@@ -4,14 +4,14 @@ const jwt = require('jsonwebtoken');
 const JWT_CONFIG = {
   ACCESS_TOKEN: {
     SECRET: process.env.JWT_ACCESS_SECRET || 'your-access-secret-key',
-    EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES || '15m',
+    EXPIRES_IN: process.env.JWT_ACCESS_EXPIRES || '30d', // Changed from 15m to 30d
     ALGORITHM: 'HS256',
     ISSUER: 'mini-dashboard-app',
     AUDIENCE: 'dashboard-users'
   },
   REFRESH_TOKEN: {
     SECRET: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
-    EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES || '7d',
+    EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES || '90d', // Changed from 7d to 90d
     ALGORITHM: 'HS256',
     ISSUER: 'mini-dashboard-app',
     AUDIENCE: 'dashboard-users'

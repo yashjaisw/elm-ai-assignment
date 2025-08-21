@@ -369,6 +369,17 @@ function Profile() {
                 />
               </Grid>
 
+                              <Grid item xs={12}>
+                  <TextField
+                    label="Profile Picture URL"
+                    value={formData.profilePicture}
+                    onChange={handleInputChange('profilePicture')}
+                    placeholder="https://example.com/avatar.jpg"
+                    helperText="Enter a URL for your profile picture"
+                    disabled={!isEditing} // Optional: keep it read-only unless editing
+                  />
+                </Grid>
+
               <Grid item xs={12}>
                 <TextField
                   label="Email Address"
@@ -395,17 +406,8 @@ function Profile() {
                 />
               </Grid>
 
-              {isEditing && (
-                <Grid item xs={12}>
-                  <TextField
-                    label="Profile Picture URL"
-                    value={formData.profilePicture}
-                    onChange={handleInputChange('profilePicture')}
-                    placeholder="https://example.com/avatar.jpg"
-                    helperText="Enter a URL for your profile picture"
-                  />
-                </Grid>
-              )}
+
+              
             </Grid>
           </Paper>
         </Grid>

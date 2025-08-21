@@ -23,10 +23,6 @@ const updateProfileValidation = [
     .optional()
     .isLength({ max: 500 })
     .withMessage('Bio cannot exceed 500 characters'),
-  body('profilePicture')
-    .optional()
-    .isURL()
-    .withMessage('Profile picture must be a valid URL')
 ];
 
 // Get current user profile
