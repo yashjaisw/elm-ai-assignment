@@ -1,4 +1,4 @@
-# Mini User Dashboard App
+# ELM User Dashboard App
 
 A full-stack web application built with React, Redux, Material-UI, Node.js, Express, and MongoDB. Features authentication, CRUD operations, file uploads, and a responsive dashboard interface.
 
@@ -55,7 +55,7 @@ A full-stack web application built with React, Redux, Material-UI, Node.js, Expr
 ## 📁 Project Structure
 
 ```
-mini-user-dashboard/
+elm-user-dashboard/
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/          # Request handlers
