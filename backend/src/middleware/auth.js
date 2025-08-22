@@ -4,8 +4,8 @@ const User = require('../models/User');
 // JWT configuration
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'your-access-secret-key';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key';
-const JWT_ACCESS_EXPIRES = process.env.JWT_ACCESS_EXPIRES || '15m';
-const JWT_REFRESH_EXPIRES = process.env.JWT_REFRESH_EXPIRES || '7d';
+const JWT_ACCESS_EXPIRES = process.env.JWT_ACCESS_EXPIRES || '30d';
+const JWT_REFRESH_EXPIRES = process.env.JWT_REFRESH_EXPIRES || '90d'; 
 
 // Generate access token
 const generateAccessToken = (payload) => {

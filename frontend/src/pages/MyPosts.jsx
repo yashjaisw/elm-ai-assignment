@@ -80,7 +80,6 @@ function MyPosts() {
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
   
   // Pagination
   const [page, setPage] = useState(1);
@@ -99,25 +98,34 @@ function MyPosts() {
       status: statusFilter,
       category: categoryFilter,
       sortBy,
-      sortOrder,
+      sortOrder: 'desc', // Always desc for newest first
     };
-    
-    // Remove empty parameters
-    Object.keys(params).forEach(key => {
-      if (!params[key]) delete params[key];
-    });
-
     dispatch(fetchMyPosts(params));
-  }, [dispatch, page, limit, searchTerm, statusFilter, categoryFilter, sortBy, sortOrder]);
+  }, [dispatch, page, limit, searchTerm, statusFilter, categoryFilter, sortBy]);
 
-  // Handle search with debounce
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setPage(1); // Reset to first page when searching
-    }, 500);
+  // Handle search
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    setPage(1); // Reset to first page when searching
+  };
 
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm]);
+  // Handle filter changes
+  const handleFilterChange = (filterName, value) => {
+    switch (filterName) {
+      case 'status':
+        setStatusFilter(value);
+        break;
+      case 'category':
+        setCategoryFilter(value);
+        break;
+      case 'sortBy':
+        setSortBy(value);
+        break;
+      default:
+        break;
+    }
+    setPage(1); // Reset to first page when filtering
+  };
 
   // Handle post actions
   const handleCreatePost = () => {
@@ -128,25 +136,16 @@ function MyPosts() {
   const handleEditPost = (post) => {
     setEditingPost(post);
     setPostDialogOpen(true);
-    handleMenuClose();
   };
 
-  const handleDeletePost = (post) => {
-    setPostToDelete(post);
-    setDeleteDialogOpen(true);
-    handleMenuClose();
-  };
-
-  const confirmDeletePost = async () => {
-    if (!postToDelete) return;
-
+  const handleDeletePost = async (postId) => {
     try {
-      await dispatch(deletePost(postToDelete._id)).unwrap();
+      await dispatch(deletePost(postId)).unwrap();
       enqueueSnackbar('Post deleted successfully', { variant: 'success' });
       setDeleteDialogOpen(false);
       setPostToDelete(null);
     } catch (error) {
-      enqueueSnackbar(error || 'Failed to delete post', { variant: 'error' });
+      enqueueSnackbar('Failed to delete post', { variant: 'error' });
     }
   };
 
@@ -165,105 +164,78 @@ function MyPosts() {
     setSelectedPost(null);
   };
 
-  // Get status color
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'published':
-        return 'success';
-      case 'Drafts':
-        return 'warning';
-      case 'archived':
-        return 'default';
-      default:
-        return 'default';
-    }
-  };
-
-  // Get status icon
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'published':
-        return <Publish fontSize="small" />;
-      case 'Drafts':
-        return <Drafts fontSize="small" />;
-      case 'archived':
-        return <Archive fontSize="small" />;
-      default:
-        return null;
-    }
-  };
-
+  // Loading state
   if (loading && (!myPosts || myPosts.length === 0)) {
-    return <LoadingSpinner message="Loading your posts..." />;
-  }
-
-  if (error) {
-    return (
-      <Box p={3}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" component="h1">
-          My Posts
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={handleCreatePost}
-        >
-          Create New Post
-        </Button>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        justifyContent: { xs: 'center', md: 'space-between' }, 
+        alignItems: { xs: 'center', md: 'center' }, 
+        mb: 4,
+        gap: { xs: 2, md: 0 }
+      }}>
+        <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+          <Typography variant="h4" component="h1" gutterBottom fontWeight={700}>
+            My Posts
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Manage and organize your published content
+          </Typography>
+        </Box>
       </Box>
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 3 }}>
+      <Paper sx={{ p: 3, mb: 4, borderRadius: 2 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item>
-            <FilterList color="action" />
-          </Grid>
-          
-          <Grid item xs={12} sm={4}>
+          {/* Search */}
+          <Grid item xs={12} md={4}>
             <TextField
-              size="small"
+              fullWidth
               placeholder="Search your posts..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearch}
               InputProps={{
-                startAdornment: <Search sx={{ mr: 1, color: 'action.active' }} />,
+                startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
               }}
-              fullWidth
             />
           </Grid>
 
-          <Grid item xs={12} sm={2}>
-            <FormControl size="small" fullWidth>
+          {/* Filter Icon */}
+          <Grid item xs={12} md={.5} sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
+            <FilterList color="action" />
+          </Grid>
+
+          {/* Status Filter */}
+          <Grid item xs={6} md={2}>
+            <FormControl fullWidth size="small">
               <InputLabel>Status</InputLabel>
               <Select
                 value={statusFilter}
                 label="Status"
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
               >
                 <MenuItem value="">All Status</MenuItem>
                 <MenuItem value="published">Published</MenuItem>
-                <MenuItem value="Drafts">Drafts</MenuItem>
+                <MenuItem value="draft">Draft</MenuItem>
                 <MenuItem value="archived">Archived</MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={2}>
-            <FormControl size="small" fullWidth>
+          {/* Category Filter */}
+          <Grid item xs={6} md={2}>
+            <FormControl fullWidth size="small">
               <InputLabel>Category</InputLabel>
               <Select
                 value={categoryFilter}
                 label="Category"
-                onChange={(e) => setCategoryFilter(e.target.value)}
+                onChange={(e) => handleFilterChange('category', e.target.value)}
               >
                 <MenuItem value="">All Categories</MenuItem>
                 <MenuItem value="general">General</MenuItem>
@@ -271,227 +243,170 @@ function MyPosts() {
                 <MenuItem value="business">Business</MenuItem>
                 <MenuItem value="lifestyle">Lifestyle</MenuItem>
                 <MenuItem value="education">Education</MenuItem>
-                <MenuItem value="other">Other</MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={2}>
-            <FormControl size="small" fullWidth>
+          {/* Sort By */}
+          <Grid item xs={12} md={2}>
+            <FormControl fullWidth size="small">
               <InputLabel>Sort By</InputLabel>
               <Select
                 value={sortBy}
                 label="Sort By"
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
               >
                 <MenuItem value="createdAt">Date Created</MenuItem>
-                <MenuItem value="updatedAt">Last Modified</MenuItem>
+                <MenuItem value="updatedAt">Last Updated</MenuItem>
                 <MenuItem value="title">Title</MenuItem>
                 <MenuItem value="views">Views</MenuItem>
-                <MenuItem value="likesCount">Likes</MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={2}>
-            <FormControl size="small" fullWidth>
-              <InputLabel>Order</InputLabel>
-              <Select
-                value={sortOrder}
-                label="Order"
-                onChange={(e) => setSortOrder(e.target.value)}
-              >
-                <MenuItem value="desc">Newest First</MenuItem>
-                <MenuItem value="asc">Oldest First</MenuItem>
-              </Select>
-            </FormControl>
+          {/* Create New Post Button */}
+          <Grid item xs={12} md={1.5}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleCreatePost}
+              fullWidth
+              sx={{ 
+                px: 2, 
+                py: 1.5,
+                height: 40
+              }}
+            >
+              New Post
+            </Button>
           </Grid>
         </Grid>
       </Paper>
 
       {/* Posts Grid */}
-      {myPosts && myPosts.length > 0 ? (
+      {myPosts.length === 0 ? (
+        <EmptyState
+          title="No posts yet"
+          description="Start creating your first post to share your thoughts with the community"
+          action={
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleCreatePost}
+              sx={{ mt: 2 }}
+            >
+              Create Your First Post
+            </Button>
+          }
+        />
+      ) : (
         <Grid container spacing={3}>
           {myPosts.map((post) => (
             <Grid item xs={12} sm={6} md={4} key={post._id}>
               <Card 
                 sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
+                  height: '100%',
+                  display: 'flex',
                   flexDirection: 'column',
-                  transition: 'transform 0.2s',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease-in-out',
                   '&:hover': {
+                    bgcolor: 'grey.50',
                     transform: 'translateY(-2px)',
-                    boxShadow: 4,
-                  }
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  },
                 }}
+                onClick={() => handleViewPost(post._id)}
               >
                 <CardContent sx={{ flexGrow: 1 }}>
                   {/* Post Header */}
-                  <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                    <Chip
-                      icon={getStatusIcon(post.status)}
-                      label={post.status}
-                      color={getStatusColor(post.status)}
-                      size="small"
-                      sx={{ textTransform: 'capitalize' }}
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleMenuOpen(e, post)}
-                    >
-                      <MoreVert fontSize="small" />
-                    </IconButton>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                      {post.author?.firstName?.[0] || 'U'}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {post.author?.firstName} {post.author?.lastName}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {format(new Date(post.createdAt), 'MMM dd, yyyy')}
+                      </Typography>
+                    </Box>
                   </Box>
 
-                  {/* Post Title */}
-                  <Typography 
-                    variant="h6" 
-                    component="h2" 
-                    gutterBottom
-                    sx={{
-                      cursor: 'pointer',
-                      '&:hover': { color: 'primary.main' },
-                      display: '-webkit-box',
-                      overflow: 'hidden',
-                      WebkitBoxOrient: 'vertical',
-                      WebkitLineClamp: 2,
-                    }}
-                    onClick={() => handleViewPost(post._id)}
-                  >
+                  {/* Post Content */}
+                  <Typography variant="h6" component="h3" gutterBottom fontWeight={600}>
                     {post.title}
                   </Typography>
-
-                  {/* Post Excerpt */}
                   <Typography 
                     variant="body2" 
                     color="text.secondary" 
-                    paragraph
                     sx={{
-                      display: '-webkit-box',
                       overflow: 'hidden',
-                      WebkitBoxOrient: 'vertical',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
                       WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
                     }}
                   >
-                    {post.excerpt}
+                    {post.content}
                   </Typography>
 
-                  {/* Category */}
-                  <Chip
-                    label={post.category}
-                    size="small"
-                    variant="outlined"
-                    sx={{ textTransform: 'capitalize', mb: 1 }}
-                  />
-
-                  <Divider sx={{ my: 1 }} />
-
-                  {/* Post Stats */}
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box display="flex" gap={2}>
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        <Visibility fontSize="small" color="action" />
-                        <Typography variant="caption">{post.views || 0}</Typography>
-                      </Box>
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        <ThumbUp fontSize="small" color="action" />
-                        <Typography variant="caption">{post.likesCount || 0}</Typography>
-                      </Box>
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        <Comment fontSize="small" color="action" />
-                        <Typography variant="caption">{post.commentsCount || 0}</Typography>
-                      </Box>
-                    </Box>
-                    
-                    <Typography variant="caption" color="text.secondary">
-                      {format(new Date(post.createdAt), 'MMM dd, yyyy')}
-                    </Typography>
+                  {/* Status and Tags */}
+                  <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    <Chip
+                      label={post.status || 'draft'}
+                      size="small"
+                      color={post.status === 'published' ? 'success' : 'default'}
+                      variant="outlined"
+                    />
+                    {post.tags && post.tags.slice(0, 2).map((tag, index) => (
+                      <Chip
+                        key={index}
+                        label={tag}
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontSize: '0.75rem' }}
+                      />
+                    ))}
                   </Box>
                 </CardContent>
 
-                <CardActions>
-                  <Button
-                    size="small"
-                    startIcon={<Visibility />}
-                    onClick={() => handleViewPost(post._id)}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    size="small"
-                    startIcon={<Edit />}
-                    onClick={() => handleEditPost(post)}
-                  >
-                    Edit
-                  </Button>
+                {/* Card Actions */}
+                <CardActions sx={{ p: 2, pt: 0 }}>
+                  <Box sx={{ display: 'flex', gap: 1, width: '100%', justifyContent: 'flex-end' }}>
+                    <Tooltip title="Edit Post">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditPost(post);
+                        }}
+                        sx={{ color: 'secondary.main' }}
+                      >
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Post">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPostToDelete(post);
+                          setDeleteDialogOpen(true);
+                        }}
+                        sx={{ color: 'error.main' }}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </CardActions>
               </Card>
             </Grid>
           ))}
         </Grid>
-      ) : (
-        <EmptyState
-          title="No posts yet"
-          description="You haven't created any posts yet. Create your first post to get started!"
-          actionLabel="Create Post"
-          onAction={handleCreatePost}
-          icon={<Add sx={{ fontSize: 48 }} />}
-        />
       )}
-
-      {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={4}>
-          <Button
-            disabled={page === 1}
-            onClick={() => setPage(page - 1)}
-            sx={{ mr: 1 }}
-          >
-            Previous
-          </Button>
-          
-          <Typography variant="body2" sx={{ mx: 2, alignSelf: 'center' }}>
-            Page {page} of {pagination.totalPages}
-          </Typography>
-          
-          <Button
-            disabled={page === pagination.totalPages}
-            onClick={() => setPage(page + 1)}
-            sx={{ ml: 1 }}
-          >
-            Next
-          </Button>
-        </Box>
-      )}
-
-      {/* Post Actions Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={() => handleViewPost(selectedPost?._id)}>
-          <ListItemIcon>
-            <Visibility fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>View Post</ListItemText>
-        </MenuItem>
-        
-        <MenuItem onClick={() => handleEditPost(selectedPost)}>
-          <ListItemIcon>
-            <Edit fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Edit Post</ListItemText>
-        </MenuItem>
-        
-        <MenuItem onClick={() => handleDeletePost(selectedPost)} sx={{ color: 'error.main' }}>
-          <ListItemIcon>
-            <Delete fontSize="small" color="error" />
-          </ListItemIcon>
-          <ListItemText>Delete Post</ListItemText>
-        </MenuItem>
-      </Menu>
 
       {/* Post Dialog */}
       <PostDialog
@@ -501,7 +416,12 @@ function MyPosts() {
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Delete Post</DialogTitle>
         <DialogContent>
           <Typography>
@@ -510,7 +430,11 @@ function MyPosts() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDeletePost} color="error" variant="contained">
+          <Button 
+            onClick={() => handleDeletePost(postToDelete?._id)} 
+            color="error" 
+            variant="contained"
+          >
             Delete
           </Button>
         </DialogActions>

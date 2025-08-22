@@ -127,11 +127,10 @@ function Login() {
         enqueueSnackbar('Welcome back!', { variant: 'success' });
         navigate('/posts');
       } else {
-        enqueueSnackbar(resultAction.payload || 'Login failed', { variant: 'error' });
       }
     } catch (error) {
       console.error('Login error:', error);
-      enqueueSnackbar('An unexpected error occurred', { variant: 'error' });
+      enqueueSnackbar('An unexpected error occurred. Please try again.', { variant: 'error' });
     }
   };
 
@@ -180,11 +179,11 @@ function Login() {
         enqueueSnackbar('Account created successfully!', { variant: 'success' });
         navigate('/posts');
       } else {
-        enqueueSnackbar(resultAction.payload || 'Registration failed', { variant: 'error' });
+        enqueueSnackbar(resultAction.payload || 'Registration failed. Please try again.', { variant: 'error' });
       }
     } catch (error) {
       console.error('Registration error:', error);
-      enqueueSnackbar('An unexpected error occurred', { variant: 'error' });
+      enqueueSnackbar('An unexpected error occurred. Please try again.', { variant: 'error' });
     }
   };
 
@@ -215,10 +214,13 @@ function Login() {
           {/* Header */}
           <Box textAlign="center" mb={4}>
             <Typography variant="h4" component="h1" gutterBottom fontWeight={700}>
-              Welcome Back
+              Welcome to the Posts Dashboard App
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" color="text.secondary" gutterBottom>
               Sign in to your account or create a new one
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              This is an Online Blog Posting Assignment
             </Typography>
           </Box>
 
@@ -349,6 +351,13 @@ function Login() {
                   onChange={(e) => setRegisterForm({ ...registerForm, lastName: e.target.value })}
                   error={!!formErrors.lastName}
                   helperText={formErrors.lastName}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Box>
               <TextField

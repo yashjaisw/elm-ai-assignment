@@ -17,6 +17,8 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  Grid,
+  IconButton,
 } from '@mui/material';
 import { Close, CloudUpload } from '@mui/icons-material';
 
@@ -220,180 +222,169 @@ function PostDialog({ open, onClose, post = null }) {
       maxWidth="md"
       fullWidth
       PaperProps={{
-        sx: { minHeight: '80vh' }
+        sx: {
+          width: { xs: '95%', sm: '80%', md: '70%' },
+          maxWidth: 800,
+          maxHeight: { xs: '95vh', sm: '90vh' },
+          m: { xs: 1, sm: 2 },
+          display: 'flex',
+          flexDirection: 'column',
+        }
       }}
     >
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">
-          {isEditing ? 'Edit Post' : 'Create New Post'}
-        </Typography>
-        <Button
-          onClick={onClose}
-          sx={{ minWidth: 'auto', p: 1 }}
-        >
-          <Close />
-        </Button>
+      <DialogTitle sx={{ pb: 1, flexShrink: 0 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" component="div">
+            {isEditing ? 'Edit Post' : 'Create New Post'}
+          </Typography>
+          <IconButton onClick={onClose} size="small">
+            <Close />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
-      <form onSubmit={handleSubmit}>
-        <DialogContent sx={{ pt: 2 }}>
-          {/* Title */}
-          <TextField
-            fullWidth
-            label="Title"
-            value={formData.title}
-            onChange={handleChange('title')}
-            error={!!formErrors.title}
-            helperText={formErrors.title || `${formData.title.length}/200 characters`}
-            margin="normal"
-            required
-          />
+      <DialogContent style={{ paddingTop: 5 }} sx={{ pb: 2, paddingTop: 24, flex: 1, overflow: 'auto' }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Grid container spacing={2}>
+            {/* Title */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Post Title"
+                value={formData.title}
+                onChange={handleChange('title')}
+                error={!!formErrors.title}
+                helperText={formErrors.title}
+                required
+                variant="outlined"
+              />
+            </Grid>
 
-          {/* Content */}
-          <TextField
-            fullWidth
-            label="Content"
-            value={formData.content}
-            onChange={handleChange('content')}
-            error={!!formErrors.content}
-            helperText={formErrors.content || `${formData.content.length}/5000 characters • ~${getReadingTime()} min read`}
-            margin="normal"
-            multiline
-            rows={8}
-            required
-          />
+            {/* Category and Status */}
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Category</InputLabel>
+                <Select
+                  value={formData.category}
+                  onChange={handleChange('category')}
+                  label="Category"
+                >
+                  {POST_CATEGORIES.map((category) => (
+                    <MenuItem key={category.value} value={category.value}>
+                      {category.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-          {/* Excerpt */}
-          <TextField
-            fullWidth
-            label="Excerpt (Optional)"
-            value={formData.excerpt}
-            onChange={handleChange('excerpt')}
-            error={!!formErrors.excerpt}
-            helperText={formErrors.excerpt || 'Brief description of the post for previews'}
-            margin="normal"
-            multiline
-            rows={2}
-          />
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={formData.status}
+                  onChange={handleChange('status')}
+                  label="Status"
+                >
+                  {POST_STATUSES.map((status) => (
+                    <MenuItem key={status.value} value={status.value}>
+                      {status.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
 
-          {/* Category and Status */}
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={formData.category}
-                onChange={handleChange('category')}
-                label="Category"
-              >
-                {POST_CATEGORIES.map(category => (
-                  <MenuItem key={category.value} value={category.value}>
-                    {category.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {/* Content */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Post Content"
+                value={formData.content}
+                onChange={handleChange('content')}
+                error={!!formErrors.content}
+                helperText={formErrors.content}
+                required
+                multiline
+                rows={6}
+                variant="outlined"
+                placeholder="Write your post content here..."
+              />
+            </Grid>
 
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={formData.status}
-                onChange={handleChange('status')}
-                label="Status"
-              >
-                {POST_STATUSES.map(status => (
-                  <MenuItem key={status.value} value={status.value}>
-                    {status.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+            {/* Tags */}
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Tags (press Enter to add)"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyPress={handleTagKeyDown}
+                variant="outlined"
+                helperText="Add tags to help others find your post"
+              />
+              {formData.tags.length > 0 && (
+                <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {formData.tags.map((tag, index) => (
+                    <Chip
+                      key={index}
+                      label={tag}
+                      onDelete={() => removeTag(tag)}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  ))}
+                </Box>
+              )}
+            </Grid>
 
-          {/* Tags */}
-          <Box sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Tags"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              onBlur={addTag}
-              helperText="Press Enter or comma to add tags (max 5)"
-              margin="normal"
-            />
-            
-            {formData.tags.length > 0 && (
-              <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {formData.tags.map(tag => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    onDelete={() => removeTag(tag)}
-                    size="small"
-                  />
-                ))}
-              </Box>
-            )}
-          </Box>
+            {/* File Upload */}
+            <Grid item xs={12}>
+              <FileUploader
+                onFileUpload={setUploadedFile}
+                uploadedFile={uploadedFile}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+      </DialogContent>
 
-          {/* Meta Description */}
-          <TextField
-            fullWidth
-            label="Meta Description (SEO)"
-            value={formData.metaDescription}
-            onChange={handleChange('metaDescription')}
-            error={!!formErrors.metaDescription}
-            helperText={formErrors.metaDescription || 'Description for search engines'}
-            margin="normal"
-            multiline
-            rows={2}
-          />
-
-          {/* File Upload */}
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Attachment (Optional)
-            </Typography>
-            <FileUploader
-              onFileSelect={setUploadedFile}
-              selectedFile={uploadedFile}
-            />
-          </Box>
-
-          {/* Existing attachments for editing */}
-          {isEditing && post?.attachments && post.attachments.length > 0 && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Current Attachments
-              </Typography>
-              {post.attachments.map((attachment, index) => (
-                <Alert key={index} severity="info" sx={{ mt: 1 }}>
-                  <Typography variant="body2">
-                    <strong>{attachment.originalName}</strong> ({(attachment.size / 1024).toFixed(1)} KB)
-                  </Typography>
-                </Alert>
-              ))}
-            </Box>
+      <DialogActions sx={{ 
+        px: 3, 
+        pb: 3,
+        flexDirection: { xs: 'column', sm: 'row' },
+        gap: { xs: 1, sm: 0 },
+        flexShrink: 0
+      }}>
+        <Button
+          onClick={onClose}
+          variant="outlined"
+          fullWidth={false}
+          sx={{ 
+            width: { xs: '100%', sm: 'auto' },
+            order: { xs: 1, sm: 1 }
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={isLoading}
+          fullWidth={false}
+          sx={{ 
+            width: { xs: '100%', sm: 'auto' },
+            order: { xs: 2, sm: 2 }
+          }}
+        >
+          {isLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            isEditing ? 'Update Post' : 'Create Post'
           )}
-        </DialogContent>
-
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : <CloudUpload />}
-          >
-            {isLoading 
-              ? (isEditing ? 'Updating...' : 'Creating...')
-              : (isEditing ? 'Update Post' : 'Create Post')
-            }
-          </Button>
-        </DialogActions>
-      </form>
+        </Button>
+      </DialogActions>
     </Dialog>
   );
 }

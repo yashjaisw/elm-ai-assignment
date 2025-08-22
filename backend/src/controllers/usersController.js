@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Post = require('../models/Post'); // Add this at the top
 const { body, validationResult } = require('express-validator');
 const { deleteFromCache } = require('../config/redis');
 
@@ -156,15 +157,19 @@ const getUserStats = async (req, res) => {
     // Calculate days since joining
     const daysSinceJoining = Math.floor((Date.now() - user.createdAt) / (1000 * 60 * 60 * 24));
     
+    const totalPosts = await Post.countDocuments({ author: userId });
+    const totalLikes = await Post.aggregate([
+      { $match: { author: userId } },
+      { $group: { _id: null, likes: { $sum: "$likes" } } }
+    ]);
     const stats = {
       loginCount: user.loginCount || 0,
       lastLoginAt: user.lastLoginAt,
       memberSince: user.createdAt,
       daysSinceJoining,
-      // These could be calculated from posts
-      totalPosts: 0,
-      totalLikes: 0,
-      totalComments: 0
+      totalPosts,
+      totalLikes: totalLikes[0]?.likes || 0,
+      totalComments: 0 // You can add comment counting logic if needed
     };
 
     console.log(`📊 Stats requested by user: ${req.user.fullName}`);

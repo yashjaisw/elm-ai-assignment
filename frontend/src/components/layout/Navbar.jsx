@@ -166,6 +166,7 @@ function Navbar() {
 
           {/* Profile Menu */}
           <IconButton
+            onMouseEnter={handleProfileMenuOpen}
             onClick={handleProfileMenuOpen}
             sx={{
               p: 0.5,
@@ -204,9 +205,20 @@ function Navbar() {
             }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            MenuListProps={{
+              onMouseLeave: handleMenuClose, // Close menu when mouse leaves
+            }}
           >
-            <MenuItem onClick={() => navigateTo('/profile')}>
-              <ListItemIcon>
+            <MenuItem
+              onClick={() => navigateTo('/profile')}
+              sx={{
+                '&:hover': {
+                  bgcolor: 'primary.main',
+                  color: 'common.white',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: 'inherit' }}>
                 <AccountCircle fontSize="small" />
               </ListItemIcon>
               <ListItemText primary="Profile" />
@@ -214,8 +226,14 @@ function Navbar() {
             
             <Divider />
             
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
+            <MenuItem onClick={handleLogout} sx={{ 
+              color: 'error.main',
+              '&:hover': {
+                bgcolor: 'error.main',
+                color: 'white',
+              }
+            }}>
+              <ListItemIcon sx={{ color: 'inherit' }}>
                 <Logout fontSize="small" />
               </ListItemIcon>
               <ListItemText primary="Logout" />

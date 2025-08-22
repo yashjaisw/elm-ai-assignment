@@ -248,7 +248,7 @@ function Profile() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="1300" sx={{ py: 4 }}>
       <Grid container spacing={3}>
         {/* Profile Header */}
         <Grid item xs={12}>
@@ -264,14 +264,25 @@ function Profile() {
               />
             </Box>
 
-            <Box display="flex" alignItems="center" gap={3}>
-              <Box position="relative">
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: { xs: 'center', md: 'center' },
+                gap: 3,
+                px: 0,
+                width: '100%',
+              }}
+            >
+              {/* Avatar centered on mobile */}
+              <Box position="relative" sx={{ mb: { xs: 2, md: 0 } }}>
                 <Avatar
-                  sx={{ 
-                    width: 120, 
-                    height: 120, 
+                  sx={{
+                    width: 120,
+                    height: 120,
                     fontSize: '2rem',
-                    bgcolor: 'primary.main'
+                    bgcolor: 'primary.main',
+                    mx: { xs: 'auto', md: 0 }, // Center avatar horizontally on mobile
                   }}
                   src={formData.profilePicture}
                 >
@@ -282,7 +293,7 @@ function Profile() {
                     <IconButton
                       sx={{
                         position: 'absolute',
-                        bottom: 0,
+                        top: 0, // Camera icon at top-right
                         right: 0,
                         bgcolor: 'background.paper',
                         '&:hover': { bgcolor: 'grey.100' }
@@ -294,14 +305,34 @@ function Profile() {
                 )}
               </Box>
 
-              <Box>
-                <Typography variant="h5" gutterBottom>
+              {/* Name, email, member since - stacked and centered on mobile */}
+              <Box
+                sx={{
+                  maxWidth: '100%',
+                  wordBreak: 'break-word',
+                  textAlign: { xs: 'center', md: 'left' },
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  gutterBottom
+                  sx={{ overflowWrap: 'anywhere' }}
+                >
                   {user.fullName || `${user.firstName} ${user.lastName}`}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ overflowWrap: 'anywhere' }}
+                >
                   {user.email}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ overflowWrap: 'anywhere' }}
+                >
                   Member since {format(new Date(user.createdAt), 'MMMM yyyy')}
                 </Typography>
               </Box>
@@ -312,7 +343,17 @@ function Profile() {
         {/* Profile Form */}
         <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3 }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+              mb={3}
+              sx={{
+                flexDirection: { xs: 'column', sm: 'row' },
+                alignItems: { xs: 'stretch', sm: 'center' },
+                gap: { xs: 2, sm: 0 },
+              }}
+            >
               <Typography variant="h6">
                 Profile Information
               </Typography>
@@ -322,16 +363,30 @@ function Profile() {
                   variant="outlined"
                   startIcon={<Edit />}
                   onClick={() => setIsEditing(true)}
+                  sx={{
+                    mt: { xs: 2, sm: 0 }, // Add margin top on mobile
+                    width: { xs: '100%', sm: 'auto' }, // Full width on mobile
+                  }}
                 >
                   Edit Profile
                 </Button>
               ) : (
-                <Box display="flex" gap={1}>
+                <Box
+                  display="flex"
+                  gap={1}
+                  sx={{
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    width: { xs: '100%', sm: 'auto' },
+                  }}
+                >
                   <Button
                     variant="outlined"
                     startIcon={<Cancel />}
                     onClick={handleCancelEdit}
                     disabled={loading}
+                    sx={{
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
                   >
                     Cancel
                   </Button>
@@ -340,6 +395,9 @@ function Profile() {
                     startIcon={loading ? <CircularProgress size={16} /> : <Save />}
                     onClick={handleSaveProfile}
                     disabled={loading}
+                    sx={{
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
                   >
                     {loading ? 'Saving...' : 'Save Changes'}
                   </Button>
@@ -357,6 +415,15 @@ function Profile() {
                   InputProps={{
                     startAdornment: <Person sx={{ mr: 1, color: 'action.active' }} />,
                   }}
+                  sx={{
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.6)', // Lighter than editing but darker than original
+                      WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                    },
+                    '& .MuiInputLabel-root.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.5)', // Lighter than editing but darker than original
+                    },
+                  }}
                 />
               </Grid>
 
@@ -366,19 +433,37 @@ function Profile() {
                   value={formData.lastName}
                   onChange={handleInputChange('lastName')}
                   disabled={!isEditing}
+                  sx={{
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.6)', // Lighter than editing but darker than original
+                      WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                    },
+                    '& .MuiInputLabel-root.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.5)', // Lighter than editing but darker than original
+                    },
+                  }}
                 />
               </Grid>
 
-                              <Grid item xs={12}>
-                  <TextField
-                    label="Profile Picture URL"
-                    value={formData.profilePicture}
-                    onChange={handleInputChange('profilePicture')}
-                    placeholder="https://example.com/avatar.jpg"
-                    helperText="Enter a URL for your profile picture"
-                    disabled={!isEditing} // Optional: keep it read-only unless editing
-                  />
-                </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Profile Picture URL"
+                  value={formData.profilePicture}
+                  onChange={handleInputChange('profilePicture')}
+                  placeholder="https://example.com/avatar.jpg"
+                  helperText="Enter a URL for your profile picture"
+                  disabled={!isEditing}
+                  sx={{
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.6)', // Lighter than editing but darker than original
+                      WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                    },
+                    '& .MuiInputLabel-root.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.5)', // Lighter than editing but darker than original
+                    },
+                  }}
+                />
+              </Grid>
 
               <Grid item xs={12}>
                 <TextField
@@ -389,6 +474,15 @@ function Profile() {
                   type="email"
                   InputProps={{
                     startAdornment: <Email sx={{ mr: 1, color: 'action.active' }} />,
+                  }}
+                  sx={{
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.6)', // Lighter than editing but darker than original
+                      WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                    },
+                    '& .MuiInputLabel-root.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.5)', // Lighter than editing but darker than original
+                    },
                   }}
                 />
               </Grid>
@@ -403,11 +497,17 @@ function Profile() {
                   rows={4}
                   placeholder="Tell us about yourself..."
                   helperText={`${formData.bio.length}/500 characters`}
+                  sx={{
+                    '& .MuiInputBase-input.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.6)', // Lighter than editing but darker than original
+                      WebkitTextFillColor: 'rgba(0, 0, 0, 0.6)',
+                    },
+                    '& .MuiInputLabel-root.Mui-disabled': {
+                      color: 'rgba(0, 0, 0, 0.5)', // Lighter than editing but darker than original
+                    },
+                  }}
                 />
               </Grid>
-
-
-              
             </Grid>
           </Paper>
         </Grid>

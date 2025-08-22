@@ -242,7 +242,7 @@ function PostDetail() {
   const isOwner = currentUser && post.author?._id === currentUser._id;
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', p: { xs: 2, md: 3 } }}>
       {/* Breadcrumbs */}
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link
@@ -257,7 +257,7 @@ function PostDetail() {
           Posts
         </Link>
         <Typography color="text.primary">
-          {post.title.length > 50 ? `${post.title.substring(0, 50)}...` : post.title}
+          {post?.title?.length > 50 ? `${post.title.substring(0, 50)}...` : post?.title || 'Post'}
         </Typography>
       </Breadcrumbs>
 
@@ -271,81 +271,81 @@ function PostDetail() {
       </Button>
 
       {/* Post Content */}
-      <Paper sx={{ p: 4, mb: 3 }}>
+      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 3 }}>
         {/* Post Header */}
         <Box sx={{ mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom>
-            {post.title}
+            {post?.title}
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
             <Avatar sx={{ width: 40, height: 40 }}>
-              {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}
+              {post?.author?.firstName?.[0]}{post?.author?.lastName?.[0]}
             </Avatar>
             <Box sx={{ flex: 1 }}>
               <Typography variant="subtitle1" fontWeight="medium">
-                {post.author?.firstName} {post.author?.lastName}
+                {post?.author?.firstName} {post?.author?.lastName}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Schedule fontSize="small" color="action" />
                   <Typography variant="caption" color="text.secondary">
-                    {format(new Date(post.createdAt), 'MMMM dd, yyyy • h:mm a')}
+                    {post?.createdAt ? format(new Date(post.createdAt), 'MMMM dd, yyyy • h:mm a') : ''}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Visibility fontSize="small" color="action" />
                   <Typography variant="caption" color="text.secondary">
-                    {post.views || 0} views
+                    {post?.views || 0} views
                   </Typography>
                 </Box>
                 <Typography variant="caption" color="text.secondary">
-                  {post.readingTime || 1} min read
+                  {post?.readingTime || 1} min read
                 </Typography>
               </Box>
             </Box>
-
-            {/* Action Buttons */}
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {isOwner && (
-                <>
-                  <IconButton
-                    color="primary"
-                    onClick={() => navigate(`/posts/${postId}/edit`)}
-                    title="Edit post"
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={handleDeletePost}
-                    title="Delete post"
-                  >
-                    <Delete />
-                  </IconButton>
-                </>
-              )}
-            </Box>
           </Box>
 
-          {/* Category and Tags */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+          {/* Action Buttons */}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {currentUser?._id === post?.author?._id && (
+              <>
+                <IconButton
+                  color="primary"
+                  onClick={() => navigate(`/posts/${postId}/edit`)}
+                  title="Edit post"
+                >
+                  <Edit />
+                </IconButton>
+                <IconButton
+                  color="error"
+                  onClick={handleDeletePost}
+                  title="Delete post"
+                >
+                  <Delete />
+                </IconButton>
+              </>
+            )}
+          </Box>
+        </Box>
+
+        {/* Category and Tags */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+          <Chip 
+            label={post?.category} 
+            size="small" 
+            color="primary" 
+            variant="outlined"
+            sx={{ textTransform: 'capitalize' }}
+          />
+          {post?.tags?.map(tag => (
             <Chip 
-              label={post.category} 
+              key={tag} 
+              label={`#${tag}`} 
               size="small" 
-              color="primary" 
-              variant="outlined"
-              sx={{ textTransform: 'capitalize' }}
+              variant="outlined" 
             />
-            {post.tags?.map(tag => (
-              <Chip 
-                key={tag} 
-                label={`#${tag}`} 
-                size="small" 
-                variant="outlined" 
-              />
-            ))}
-          </Box>
+          ))}
         </Box>
 
         <Divider sx={{ mb: 3 }} />
@@ -360,11 +360,11 @@ function PostDetail() {
             mb: 3 
           }}
         >
-          {post.content}
+          {post?.content}
         </Typography>
 
         {/* Attachments */}
-        {post.attachments && post.attachments.length > 0 && (
+        {post?.attachments && post.attachments.length > 0 && (
           <Box sx={{ mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Attachments
@@ -372,7 +372,7 @@ function PostDetail() {
             {post.attachments.map((attachment, index) => (
               <Card key={index} sx={{ mb: 1 }}>
                 <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <AttachFile color="action" />
                       <Box>
@@ -399,13 +399,13 @@ function PostDetail() {
         )}
 
         {/* Interaction Buttons */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, pt: 2, borderTop: 1, borderColor: 'divider', flexWrap: 'wrap' }}>
           <Button
             startIcon={isLiked ? <ThumbUp /> : <ThumbUpOutlined />}
             onClick={handleLikeToggle}
             color={isLiked ? 'primary' : 'inherit'}
           >
-            {post.likesCount || 0} {post.likesCount === 1 ? 'Like' : 'Likes'}
+            {post?.likesCount || 0} {post?.likesCount === 1 ? 'Like' : 'Likes'}
           </Button>
 
           <Button
@@ -413,7 +413,7 @@ function PostDetail() {
             color="inherit"
             onClick={() => document.getElementById('comment-section')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            {post.comments?.length || 0} {post.comments?.length === 1 ? 'Comment' : 'Comments'}
+            {post?.comments?.length || 0} {post?.comments?.length === 1 ? 'Comment' : 'Comments'}
           </Button>
 
           <Button
@@ -435,19 +435,19 @@ function PostDetail() {
       </Paper>
 
       {/* Comments Section */}
-      <Paper sx={{ p: 3 }} id="comment-section">
+      <Paper sx={{ p: { xs: 2, md: 3 } }} id="comment-section">
         <Typography variant="h6" gutterBottom>
-          Comments ({post.comments?.length || 0})
+          Comments ({post?.comments?.length || 0})
         </Typography>
 
         {/* Add Comment Form */}
         {currentUser ? (
           <Box component="form" onSubmit={handleCommentSubmit} sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <Avatar sx={{ width: 32, height: 32 }}>
                 {currentUser.firstName?.[0]}{currentUser.lastName?.[0]}
               </Avatar>
-              <Box sx={{ flex: 1 }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
                 <TextField
                   fullWidth
                   multiline
@@ -478,7 +478,7 @@ function PostDetail() {
         )}
 
         {/* Comments List */}
-        {post.comments && post.comments.length > 0 ? (
+        {post?.comments && post.comments.length > 0 ? (
           <Box>
             {post.comments.map((comment, index) => (
               <Box
@@ -492,11 +492,11 @@ function PostDetail() {
                   transition: 'background-color 0.3s ease'
                 }}
               >
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   <Avatar sx={{ width: 32, height: 32 }}>
                     {comment.author?.firstName?.[0]}{comment.author?.lastName?.[0]}
                   </Avatar>
-                  <Box sx={{ flex: 1 }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Box sx={{ mb: 1 }}>
                       <Typography variant="subtitle2" component="span">
                         {comment.author?.firstName} {comment.author?.lastName}
