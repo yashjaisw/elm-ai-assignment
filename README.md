@@ -40,7 +40,6 @@ A full-stack web application built with React, Redux, Material-UI, Node.js, Expr
 - **React Router v6** - Declarative routing
 - **Axios** - HTTP client with interceptors
 - **React Hook Form** - Performant forms
-- **Notistack** - Notification system
 
 ### Backend
 - **Node.js** - JavaScript runtime
@@ -192,7 +191,6 @@ The frontend will be running on `http://localhost:3000`
 
 ### Dashboard
 - **Material-UI DataGrid** with:
-  - Pagination and sorting
   - Search and filtering
   - Custom cell renderers
   - Action buttons for each post
