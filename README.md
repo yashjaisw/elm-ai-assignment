@@ -21,7 +21,6 @@ A full-stack web application built with React, Redux, Material-UI, Node.js, Expr
 - **Responsive Design** that works on all devices
 - **Optimistic Updates** for instant UI feedback
 - **Loading Skeletons** and progress indicators
-- **Snackbar Notifications** for user feedback
 - **Clean Navigation** with persistent navbar
 
 ### Technical Excellence
@@ -273,14 +272,6 @@ npm test
 4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-### Commit Message Convention
-- `feat:` - New features
-- `fix:` - Bug fixes
-- `docs:` - Documentation changes
-- `style:` - Code style changes
-- `refactor:` - Code refactoring
-- `test:` - Adding tests
-- `chore:` - Maintenance tasks
 
 ## 📄 License
 
