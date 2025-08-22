@@ -225,7 +225,7 @@ function PostDialog({ open, onClose, post = null }) {
         sx: {
           width: { xs: '95%', sm: '80%', md: '70%' },
           maxWidth: 800,
-          maxHeight: { xs: '95vh', sm: '90vh' },
+          maxHeight: { xs: '90vh', sm: '90vh' },
           m: { xs: 1, sm: 2 },
           display: 'flex',
           flexDirection: 'column',

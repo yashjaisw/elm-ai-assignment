@@ -181,7 +181,7 @@ function Posts() {
               px: 3, 
               py: 1.5,
               width: { xs: '100%', sm: 'auto' },
-              minWidth: { sm: 140 }
+              minWidth: { sm: 180 }
             }}
           >
             Create New Post
